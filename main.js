@@ -15,6 +15,7 @@ const translations = {
     lotto_count: "Lines:", lotto_bonus: "Bonus",
     fortune_birthdate: "Birth Date", fortune_birthtime: "Birth Time", fortune_gender: "Gender",
     fortune_male: "Male", fortune_female: "Female", fortune_btn: "Analyze My Destiny",
+    fortune_calendar: "Calendar Type", fortune_solar: "Solar", fortune_lunar: "Lunar (Standard)", fortune_lunar_leap: "Lunar (Leap)",
     fortune_unknown_time: "Unknown", fortune_calculating: "Calculating Four Pillars...",
     fortune_general: "General", fortune_wealth: "Wealth", fortune_love: "Love", fortune_success: "Success",
     pillar_year: "Year", pillar_month: "Month", pillar_day: "Day", pillar_hour: "Hour",
@@ -42,6 +43,7 @@ const translations = {
     lotto_count: "추첨 줄 수:", lotto_bonus: "보너스",
     fortune_birthdate: "생년월일", fortune_birthtime: "태어난 시간", fortune_gender: "성별",
     fortune_male: "남성", fortune_female: "여성", fortune_btn: "사주 분석하기",
+    fortune_calendar: "양력/음력", fortune_solar: "양력", fortune_lunar: "음력 평달", fortune_lunar_leap: "음력 윤달",
     fortune_unknown_time: "모름/기타", fortune_calculating: "만세력을 계산 중입니다...",
     fortune_general: "종합운", fortune_wealth: "재물운", fortune_love: "애정운", fortune_success: "성공운",
     pillar_year: "년(年)", pillar_month: "월(月)", pillar_day: "일(日)", pillar_hour: "시(時)",
@@ -61,7 +63,7 @@ const userLang = (navigator.language || navigator.userLanguage).startsWith('ko')
 const t = (key) => translations[userLang][key] || key;
 document.documentElement.lang = userLang;
 
-// --- SHARED LOGIC ---
+// --- SAJU LOGIC (Emulating Manse-ryeok) ---
 const cheonGan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const jiJi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 const ganjiNames = { "甲": "갑", "乙": "을", "丙": "병", "丁": "정", "戊": "무", "己": "기", "庚": "경", "辛": "신", "壬": "임", "癸": "계", "子": "자", "丑": "축", "寅": "인", "卯": "묘", "辰": "진", "巳": "사", "午": "오", "未": "미", "申": "신", "酉": "유", "戌": "술", "亥": "해" };
@@ -78,6 +80,160 @@ const getHash = (seed) => {
 
 // --- COMPONENTS ---
 
+class DailyFortune extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: 'open' }); }
+  connectedCallback() { this.renderInput(); }
+  
+  renderInput() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 3rem; backdrop-filter: blur(40px); border: 1px solid var(--surface-border); text-align: center; }
+        h2 { font-size: 2.5rem; margin: 0 0 2rem; color: var(--text-color); }
+        .form { display: grid; gap: 1.5rem; text-align: left; max-width: 450px; margin: 0 auto; }
+        .field { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+        input, select { padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-color); font-family: inherit; }
+        select option { background-color: #1a1a2e; color: #ffffff; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        button { margin-top: 1rem; padding: 1.25rem; border-radius: 1rem; border: none; background: var(--primary-color); color: #12121a; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+      </style>
+      <h2>${t('card_fortune_title')}</h2>
+      <div class="form">
+        <div class="row">
+          <div class="field"><label>${t('fortune_birthdate')}</label><input type="date" id="dob" required></div>
+          <div class="field"><label>${t('fortune_calendar')}</label>
+            <select id="calendar">
+              <option value="solar">${t('fortune_solar')}</option>
+              <option value="lunar">${t('fortune_lunar')}</option>
+              <option value="leap">${t('fortune_lunar_leap')}</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label>${t('fortune_birthtime')}</label>
+            <select id="tob">
+              <option value="unknown">${t('fortune_unknown_time')}</option>
+              <option value="0">子 (23:30-01:29)</option><option value="1">丑 (01:30-03:29)</option><option value="2">寅 (03:30-05:29)</option><option value="3">卯 (05:30-07:29)</option>
+              <option value="4">辰 (07:30-09:29)</option><option value="5">巳 (09:30-11:29)</option><option value="6">午 (11:30-13:29)</option><option value="7">未 (13:30-15:29)</option>
+              <option value="8">申 (15:30-17:29)</option><option value="9">酉 (17:30-19:29)</option><option value="10">戌 (19:30-21:29)</option><option value="11">亥 (21:30-23:29)</option>
+            </select>
+          </div>
+          <div class="field"><label>${t('fortune_gender')}</label>
+            <select id="gender">
+              <option value="m">${t('fortune_male')}</option>
+              <option value="f">${t('fortune_female')}</option>
+            </select>
+          </div>
+        </div>
+        <button id="submitBtn">${t('fortune_btn')}</button>
+      </div>
+    `;
+    this.shadowRoot.querySelector('#submitBtn').addEventListener('click', () => this.calculate());
+  }
+
+  calculate() {
+    const dob = this.shadowRoot.querySelector('#dob').value;
+    if (!dob) return;
+    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:4rem;background:var(--surface-color);border-radius:3rem;text-align:center;}.l{color:var(--primary-color);font-weight:700;animation:p 1.5s infinite;}@keyframes p{0%,100%{opacity:1;}50%{opacity:0.5;}}</style><div class="l">${t('fortune_calculating')}</div>`;
+    setTimeout(() => this.renderResult(dob), 1500);
+  }
+
+  renderResult(dob) {
+    const calendar = this.shadowRoot.querySelector('#calendar')?.value || 'solar';
+    const gender = this.shadowRoot.querySelector('#gender')?.value || 'm';
+    const tob = this.shadowRoot.querySelector('#tob')?.value || "unknown";
+    
+    const date = new Date(dob);
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    
+    // Adjusted logic for Solar/Lunar deterministic hashing
+    const calOffset = calendar === 'solar' ? 0 : (calendar === 'lunar' ? 100 : 200);
+    const genderOffset = gender === 'm' ? 0 : 50;
+    const hash = getHash(dob + calendar + gender);
+    
+    const pillars = {
+      year: getGanji((y - 4) % 60),
+      month: getGanji((y * 12 + m + 2 + calOffset) % 60),
+      day: getGanji((hash + calOffset) % 60),
+      hour: tob === "unknown" ? "??" : getGanji((hash + parseInt(tob) + calOffset + genderOffset) % 60)
+    };
+
+    const dailySeed = dob + calendar + gender + new Date().toISOString().split('T')[0];
+    const dailyHash = getHash(dailySeed);
+    const scores = { gen: 60+(dailyHash%41), wealth: 50+(dailyHash%51) };
+    
+    const fortunes = userLang === 'ko' ? [
+      "기운이 맑고 청명하니 계획했던 일을 추진하기에 매우 좋습니다.",
+      "음양의 조화가 이뤄지는 날이니 인간관계에서 큰 기쁨이 따릅니다.",
+      "재물이 창고에 쌓이는 형국입니다. 실속 있는 하루를 보내게 됩니다.",
+      "지나친 자신감은 독이 될 수 있으니 주변의 조언에 귀를 기울이세요."
+    ] : [
+      "The energy is clear and bright; it's a great day to push forward with your plans.",
+      "Harmony of Yin and Yang prevails; great joy follows in your relationships.",
+      "Wealth is accumulating in your storage; expect a substantial and fruitful day.",
+      "Overconfidence can be risky; listen to the advice of those around you."
+    ];
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 3rem; text-align: center; color: var(--text-color); }
+        .pillars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+        .pillar { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 1rem; width: 80px; }
+        .p-val { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); line-height: 1.2; }
+        .p-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0; }
+        .score { background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 1rem; }
+        .s-val { font-size: 1.5rem; font-weight: 800; color: var(--primary-color); }
+        .text { font-size: 1.25rem; line-height: 1.6; margin: 2rem 0; font-weight: 500; }
+        button { padding: 1rem 2rem; border-radius: 1rem; border: 1px solid var(--surface-border); background: transparent; color: var(--text-muted); cursor: pointer; }
+      </style>
+      <h2>${t('card_fortune_title')}</h2>
+      <div class="pillars">
+        <div class="pillar"><div class="p-val">${pillars.hour}</div><div class="p-label">${t('pillar_hour')}</div></div>
+        <div class="pillar"><div class="p-val">${pillars.day}</div><div class="p-label">${t('pillar_day')}</div></div>
+        <div class="pillar"><div class="p-val">${pillars.month}</div><div class="p-label">${t('pillar_month')}</div></div>
+        <div class="pillar"><div class="p-val">${pillars.year}</div><div class="p-label">${t('pillar_year')}</div></div>
+      </div>
+      <div class="scores">
+        <div class="score"><div class="s-val">${scores.gen}%</div><div>${t('fortune_general')}</div></div>
+        <div class="score"><div class="s-val">${scores.wealth}%</div><div>${t('fortune_wealth')}</div></div>
+      </div>
+      <div class="text">${fortunes[dailyHash % fortunes.length]}</div>
+      <button id="backBtn">← Back</button>
+    `;
+    this.shadowRoot.querySelector('#backBtn').addEventListener('click', () => this.renderInput());
+  }
+}
+customElements.define('daily-fortune', DailyFortune);
+
+class NewYearFortune extends DailyFortune {
+  renderResult(dob) {
+    const calendar = this.shadowRoot.querySelector('#calendar')?.value || 'solar';
+    const gender = this.shadowRoot.querySelector('#gender')?.value || 'm';
+    const seed = dob + calendar + gender + "2026";
+    const hash = getHash(seed);
+    const fortunes = userLang === 'ko' ? [
+      "붉은 말의 기운이 당신의 사주와 만나 역동적인 성공을 예견합니다.",
+      "안정과 변화 사이에서 지혜로운 선택이 필요한 한 해가 될 것입니다.",
+      "재물운이 상승 곡선을 그리니 하반기에 큰 성취가 따를 것입니다."
+    ] : [
+      "The energy of the Red Horse meets your destiny, foretelling dynamic success.",
+      "It will be a year requiring wise choices between stability and change.",
+      "Your wealth luck is on the rise; expect major achievements in the second half."
+    ];
+    this.shadowRoot.innerHTML = `
+      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;color:var(--text-color);}.text{font-size:1.5rem;line-height:1.8;margin:3rem 0;font-weight:700;color:var(--primary-color);}</style>
+      <h2>2026 ${t('nav_newyear')}</h2>
+      <div class="text">${fortunes[hash % fortunes.length]}</div>
+      <p style="color:var(--text-muted)">丙午年 (병오년) - 성별(${gender==='m'?'남':'여'}) / ${calendar==='solar'?'양력':'음력'} 맞춤 해설</p>
+      <button onclick="location.reload()">← Back</button>
+    `;
+  }
+}
+customElements.define('new-year-fortune', NewYearFortune);
+
 class LottoGenerator extends HTMLElement {
   constructor() {
     super();
@@ -91,105 +247,59 @@ class LottoGenerator extends HTMLElement {
       <style>
         :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 3rem; backdrop-filter: blur(40px); border: 1px solid var(--surface-border); text-align: center; color: var(--text-color); }
         h1 { font-size: 3rem; font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.06em; }
-        
         .controls { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem; }
         .tabs { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.4rem; border-radius: 1.25rem; }
         .tab { padding: 0.6em 1.25em; border-radius: 1rem; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 0.9rem; color: var(--text-muted); }
         .tab.active { background: var(--primary-color); color: #12121a; }
-        
         .settings { display: flex; align-items: center; gap: 1rem; font-weight: 600; }
-        input[type="number"] { width: 60px; padding: 0.5rem; border-radius: 0.75rem; border: 1px solid var(--surface-border); background: rgba(255,255,255,0.05); color: var(--text-color); text-align: center; font-family: inherit; }
-
+        input[type="number"] { width: 60px; padding: 0.5rem; border-radius: 0.75rem; border: 1px solid var(--surface-border); background: rgba(255,255,255,0.05); color: var(--text-color); text-align: center; }
         .results-container { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; }
         .line { display: flex; gap: 0.5rem; justify-content: center; align-items: center; flex-wrap: wrap; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
         .number { display: grid; place-content: center; width: 3rem; height: 3rem; font-size: 1.25rem; font-weight: 800; border-radius: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.5s; transform: scale(0.8); opacity: 0; position: relative; }
         .number.visible { transform: scale(1); opacity: 1; }
-        
         .bonus-sep { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); margin: 0 0.5rem; opacity: 0; transition: 0.5s; }
         .bonus-sep.visible { opacity: 1; }
         .number.bonus { border-color: var(--primary-color); color: var(--primary-color); }
         .number.bonus::after { content: '${t('lotto_bonus')}'; font-size: 0.5rem; position: absolute; bottom: 2px; }
-        
         .number.p-group { border-color: var(--primary-color); color: var(--primary-color); width: 3.5rem; }
         .number.p-group::after { content: '${t('lotto_group')}'; font-size: 0.5rem; position: absolute; bottom: 2px; }
-
         button#genBtn { font-size: 1.25rem; font-weight: 700; padding: 1.25em 3em; border: none; border-radius: 1.25rem; background: var(--primary-color); color: #12121a; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        button#genBtn:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
       </style>
-      
       <h1>${t('card_lotto_title')}</h1>
-      
       <div class="controls">
-        <div class="tabs">
-          <div class="tab ${this.type === '645' ? 'active' : ''}" data-type="645">${t('lotto_type_645')}</div>
-          <div class="tab ${this.type === 'pension' ? 'active' : ''}" data-type="pension">${t('lotto_type_pension')}</div>
-        </div>
-        <div class="settings">
-          <label>${t('lotto_count')}</label>
-          <input type="number" id="countInput" value="${this.count}" min="1" max="5">
-        </div>
+        <div class="tabs"><div class="tab ${this.type === '645' ? 'active' : ''}" data-type="645">${t('lotto_type_645')}</div><div class="tab ${this.type === 'pension' ? 'active' : ''}" data-type="pension">${t('lotto_type_pension')}</div></div>
+        <div class="settings"><label>${t('lotto_count')}</label><input type="number" id="countInput" value="${this.count}" min="1" max="5"></div>
       </div>
-
-      <div class="results-container" id="results">
-        ${this.getPlaceholderLines()}
-      </div>
-      
+      <div class="results-container" id="results">${this.getPlaceholderLines()}</div>
       <button id="genBtn">${t('lotto_btn')}</button>
     `;
-
-    this.shadowRoot.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => { this.type = tab.dataset.type; this.render(); });
-    });
-    
-    this.shadowRoot.querySelector('#countInput').addEventListener('change', (e) => {
-      this.count = Math.max(1, Math.min(5, parseInt(e.target.value) || 1));
-      this.render();
-    });
-
+    this.shadowRoot.querySelectorAll('.tab').forEach(tab => { tab.addEventListener('click', () => { this.type = tab.dataset.type; this.render(); }); });
+    this.shadowRoot.querySelector('#countInput').addEventListener('change', (e) => { this.count = Math.max(1, Math.min(5, parseInt(e.target.value) || 1)); this.render(); });
     this.shadowRoot.querySelector('#genBtn').addEventListener('click', () => this.generate());
   }
-
   getPlaceholderLines() {
     let html = '';
     for(let l=0; l<this.count; l++) {
       html += `<div class="line">`;
-      if (this.type === '645') {
-        html += Array(6).fill('<div class="number">?</div>').join('') + `<div class="bonus-sep">+</div><div class="number bonus">?</div>`;
-      } else {
-        html += `<div class="number p-group">?</div>` + Array(6).fill('<div class="number">?</div>').join('');
-      }
+      if (this.type === '645') { html += Array(6).fill('<div class="number">?</div>').join('') + `<div class="bonus-sep">+</div><div class="number bonus">?</div>`; }
+      else { html += `<div class="number p-group">?</div>` + Array(6).fill('<div class="number">?</div>').join(''); }
       html += `</div>`;
     }
     return html;
   }
-
   generate() {
     const lines = this.shadowRoot.querySelectorAll('.line');
-    
     lines.forEach((line, lineIdx) => {
-      const slots = line.querySelectorAll('.number');
-      const sep = line.querySelector('.bonus-sep');
-      let res = [];
-      
+      const slots = line.querySelectorAll('.number'); const sep = line.querySelector('.bonus-sep'); let res = [];
       if (this.type === '645') {
         const n = new Set(); while(n.size < 7) n.add(Math.floor(Math.random() * 45) + 1);
-        const arr = Array.from(n);
-        const main = arr.slice(0, 6).sort((a,b) => a-b);
-        res = [...main, arr[6]];
-      } else {
-        res = [Math.floor(Math.random() * 5) + 1, ...Array.from({length: 6}, () => Math.floor(Math.random() * 10))];
-      }
-
+        const arr = Array.from(n); const main = arr.slice(0, 6).sort((a,b) => a-b); res = [...main, arr[6]];
+      } else { res = [Math.floor(Math.random() * 5) + 1, ...Array.from({length: 6}, () => Math.floor(Math.random() * 10))]; }
       slots.forEach((el, i) => {
-        el.classList.remove('visible');
-        if(sep) sep.classList.remove('visible');
-        
+        el.classList.remove('visible'); if(sep) sep.classList.remove('visible');
         setTimeout(() => {
-          el.textContent = res[i];
-          const hue = (res[i] * (this.type==='645'?10:40) + i*20 + lineIdx*30) % 360;
-          el.style.background = `oklch(75% 0.15 ${hue} / 20%)`;
-          el.style.borderColor = `oklch(75% 0.15 ${hue} / 40%)`;
-          el.classList.add('visible');
+          el.textContent = res[i]; const hue = (res[i] * (this.type==='645'?10:40) + i*20 + lineIdx*30) % 360;
+          el.style.background = `oklch(75% 0.15 ${hue} / 20%)`; el.style.borderColor = `oklch(75% 0.15 ${hue} / 40%)`; el.classList.add('visible');
           if(sep && i === 5) sep.classList.add('visible');
         }, (lineIdx * 200) + (i * 100));
       });
@@ -197,76 +307,6 @@ class LottoGenerator extends HTMLElement {
   }
 }
 customElements.define('lotto-generator', LottoGenerator);
-
-class DailyFortune extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }); }
-  connectedCallback() { this.renderInput(); }
-  renderInput() {
-    this.shadowRoot.innerHTML = `
-      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;backdrop-filter:blur(40px);border:1px solid var(--surface-border);text-align:center;}h2{font-size:2.5rem;margin:0 0 2rem;color:var(--text-color);}.form{display:grid;gap:1.5rem;text-align:left;max-width:400px;margin:0 auto;}.field{display:flex;flex-direction:column;gap:0.5rem;}label{font-size:0.9rem;font-weight:600;color:var(--text-muted);}input,select{padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--text-color);font-family:inherit;}select option{background-color:#1a1a2e;color:#fff;}button{margin-top:1rem;padding:1.25rem;border-radius:1rem;border:none;background:var(--primary-color);color:#12121a;font-weight:700;cursor:pointer;transition:0.3s;}button:hover{transform:translateY(-2px);filter:brightness(1.1);}</style>
-      <h2>${t('card_fortune_title')}</h2><div class="form"><div class="field"><label>${t('fortune_birthdate')}</label><input type="date" id="dob" required></div><div class="field"><label>${t('fortune_birthtime')}</label><select id="tob"><option value="unknown">${t('fortune_unknown_time')}</option>${Array.from({length:12},(_,i)=>`<option value="${i}">${jiJi[i]} (${['23:30-01:29','01:30-03:29','03:30-05:29','05:30-07:29','07:30-09:29','09:30-11:29','11:30-13:29','13:30-15:29','15:30-17:29','17:30-19:29','19:30-21:29','21:30-23:29'][i]})</option>`).join('')}</select></div><button id="sub">${t('fortune_btn')}</button></div>
-    `;
-    this.shadowRoot.querySelector('#sub').addEventListener('click', () => this.calculate());
-  }
-  calculate() {
-    const dob = this.shadowRoot.querySelector('#dob').value; if(!dob) return;
-    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:4rem;background:var(--surface-color);border-radius:3rem;text-align:center;}.l{color:var(--primary-color);font-weight:700;animation:p 1.5s infinite;}@keyframes p{0%,100%{opacity:1;}50%{opacity:0.5;}}</style><div class="l">${t('fortune_calculating')}</div>`;
-    setTimeout(() => this.renderResult(dob), 1500);
-  }
-  renderResult(dob) {
-    const date = new Date(dob); const y = date.getFullYear(); const m = date.getMonth()+1; const tob = this.shadowRoot.querySelector('#tob')?.value || "unknown";
-    const hash = getHash(dob);
-    const pillars = { year: getGanji((y-4)%60), month: getGanji((y*12+m+2)%60), day: getGanji(hash%60), hour: tob==="unknown"?"??":getGanji((hash+parseInt(tob))%60) };
-    const dSeed = dob + new Date().toISOString().split('T')[0]; const dHash = getHash(dSeed);
-    const scores = { gen: 60+(dHash%41), wealth: 50+(dHash%51) };
-    const txt = userLang==='ko'?["막혔던 운이 풀리고 귀인의 도움을 받습니다.","재물이 서쪽에서 오니 금전 거래에 길합니다.","내실을 다지면 복이 절로 들어옵니다."]:["Luck is opening up with help from a mentor.","Wealth comes from the west today.","Focus on inner strength for lasting luck."];
-    this.shadowRoot.innerHTML = `
-      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;color:var(--text-color);}.ps{display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;}.p{background:rgba(255,255,255,0.05);padding:1rem;border-radius:1rem;width:80px;}.pv{font-size:1.1rem;font-weight:900;color:var(--primary-color);}.pl{font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem;}.ss{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}.s{background:rgba(255,255,255,0.03);padding:1rem;border-radius:1rem;}.sv{font-size:1.5rem;font-weight:800;color:var(--primary-color);}.text{font-size:1.25rem;line-height:1.6;margin:2rem 0;}button{padding:1rem 2rem;border-radius:1rem;border:1px solid var(--surface-border);background:transparent;color:var(--text-muted);cursor:pointer;}</style>
-      <h2>${t('card_fortune_title')}</h2><div class="ps"><div class="p"><div class="pv">${pillars.hour}</div><div class="pl">${t('pillar_hour')}</div></div><div class="p"><div class="pv">${pillars.day}</div><div class="pl">${t('pillar_day')}</div></div><div class="p"><div class="pv">${pillars.month}</div><div class="pl">${t('pillar_month')}</div></div><div class="p"><div class="pv">${pillars.year}</div><div class="pl">${t('pillar_year')}</div></div></div>
-      <div class="ss"><div class="s"><div class="sv">${scores.gen}%</div><div>${t('fortune_general')}</div></div><div class="s"><div class="sv">${scores.wealth}%</div><div>${t('fortune_wealth')}</div></div></div>
-      <div class="text">${txt[dHash%txt.length]}</div><button id="back">← Back</button>
-    `;
-    this.shadowRoot.querySelector('#back').addEventListener('click', () => this.renderInput());
-  }
-}
-customElements.define('daily-fortune', DailyFortune);
-
-class NewYearFortune extends DailyFortune {
-  renderResult(dob) {
-    const seed = dob + "2026"; const hash = getHash(seed);
-    const txt = userLang==='ko'?["명예와 재물이 동시에 따르는 해입니다.","노력이 결실을 맺는 수확의 해입니다."]:["Honor and wealth will follow you this year.","A year of harvest for your hard work."];
-    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;color:var(--text-color);}.text{font-size:1.5rem;line-height:1.8;margin:3rem 0;font-weight:700;color:var(--primary-color);}</style><h2>2026 ${t('nav_newyear')}</h2><div class="text">${txt[hash%txt.length]}</div><p style="color:var(--text-muted)">丙午年 (병오년) 사주 조화 해설</p><button onclick="location.reload()">← Back</button>`;
-  }
-}
-customElements.define('new-year-fortune', NewYearFortune);
-
-class ZodiacFortune extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }); }
-  connectedCallback() {
-    const zn = ["rat","ox","tiger","rabbit","dragon","snake","horse","goat","monkey","rooster","dog","pig"];
-    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem;}.sign{padding:1.5rem;background:rgba(255,255,255,0.05);border-radius:1.5rem;cursor:pointer;transition:0.3s;}.sign:hover{background:rgba(255,255,255,0.1);transform:translateY(-5px);}</style><h2>${t('nav_zodiac')}</h2><div class="grid">${zn.map((s,i)=>`<div class="sign" data-idx="${i}"><div>${['🐭','🐮','🐯','🐰','🐲','🐍','🐴','🐏','🐵','🐔','🐶','🐷'][i]}</div><div>${t('zodiac_'+s)}</div></div>`).join('')}</div>`;
-    this.shadowRoot.querySelectorAll('.sign').forEach(el=>el.addEventListener('click',()=>{
-      const h = getHash(zn[el.dataset.idx]+new Date().toISOString().split('T')[0]);
-      const txt = userLang==='ko'?["길운이 가득하니 뜻을 펼치세요.","주변의 도움으로 어려운 일을 해결합니다."]:["Luck is on your side today.","Solve problems with help from others."];
-      this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;text-align:center;}.text{font-size:1.25rem;margin:2rem 0;}</style><h2>${t('zodiac_'+zn[el.dataset.idx])} ${t('nav_zodiac')}</h2><div class="text">${txt[h%txt.length]}</div><button onclick="location.reload()">← Back</button>`;
-    }));
-  }
-}
-customElements.define('zodiac-fortune', ZodiacFortune);
-
-class HoroscopeFortune extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }); }
-  connectedCallback() {
-    const sn = ["aries","taurus","gemini","cancer","leo","virgo","libra","scorpio","sagittarius","capricorn","aquarius","pisces"];
-    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem;}.sign{padding:1.5rem;background:rgba(255,255,255,0.05);border-radius:1.5rem;cursor:pointer;transition:0.3s;}.sign:hover{background:rgba(255,255,255,0.1);transform:translateY(-5px);}</style><h2>${t('nav_horoscope')}</h2><div class="grid">${sn.map((s,i)=>`<div class="sign" data-idx="${i}"><div>${['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'][i]}</div><div>${t('horo_'+s)}</div></div>`).join('')}</div>`;
-    this.shadowRoot.querySelectorAll('.sign').forEach(el=>el.addEventListener('click',()=>{
-      const h = getHash(sn[el.dataset.idx]+new Date().toISOString().split('T')[0]);
-      const txt = userLang==='ko'?["창의적인 영감이 떠오르는 하루입니다.","새로운 인연이 운명처럼 다가옵니다."]:["Creative inspiration flows today.","A new connection approaches like destiny."];
-      this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;text-align:center;}.text{font-size:1.25rem;margin:2rem 0;}</style><h2>${t('horo_'+sn[el.dataset.idx])} ${t('nav_horoscope')}</h2><div class="text">${txt[h%txt.length]}</div><button onclick="location.reload()">← Back</button>`;
-    }));
-  }
-}
-customElements.define('horoscope-fortune', HoroscopeFortune);
 
 class TarotReader extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }); this.results = []; 
