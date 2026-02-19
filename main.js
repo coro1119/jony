@@ -12,6 +12,7 @@ const translations = {
     footer_text: "© 2026 Lucky Hub. All paths lead to wisdom.",
     lotto_btn: "Reveal My Luck",
     lotto_type_645: "Lotto 6/45", lotto_type_pension: "Pension 720+", lotto_group: "Grp",
+    lotto_count: "Lines:", lotto_bonus: "Bonus",
     fortune_birthdate: "Birth Date", fortune_birthtime: "Birth Time", fortune_gender: "Gender",
     fortune_male: "Male", fortune_female: "Female", fortune_btn: "Analyze My Destiny",
     fortune_unknown_time: "Unknown", fortune_calculating: "Calculating Four Pillars...",
@@ -38,6 +39,7 @@ const translations = {
     footer_text: "© 2026 럭키 허브. 모든 길은 지혜로 통합니다.",
     lotto_btn: "번호 추첨하기",
     lotto_type_645: "로또 6/45", lotto_type_pension: "연금복권 720+", lotto_group: "조",
+    lotto_count: "추첨 줄 수:", lotto_bonus: "보너스",
     fortune_birthdate: "생년월일", fortune_birthtime: "태어난 시간", fortune_gender: "성별",
     fortune_male: "남성", fortune_female: "여성", fortune_btn: "사주 분석하기",
     fortune_unknown_time: "모름/기타", fortune_calculating: "만세력을 계산 중입니다...",
@@ -81,6 +83,7 @@ class LottoGenerator extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.type = '645';
+    this.count = 1;
   }
   connectedCallback() { this.render(); }
   render() {
@@ -88,48 +91,108 @@ class LottoGenerator extends HTMLElement {
       <style>
         :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 3rem; backdrop-filter: blur(40px); border: 1px solid var(--surface-border); text-align: center; color: var(--text-color); }
         h1 { font-size: 3rem; font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.06em; }
-        .tabs { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
-        .tab { padding: 0.8em 1.5em; border-radius: 1rem; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); font-weight: 600; color: var(--text-muted); }
-        .tab.active { background: var(--primary-color); color: #12121a; border-color: transparent; }
-        .numbers { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; flex-wrap: wrap; }
-        .number { display: grid; place-content: center; width: 3.5rem; height: 3.5rem; font-size: 1.5rem; font-weight: 800; border-radius: 1.25rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.6s; transform: translateY(20px) scale(0.5); opacity: 0; position: relative; }
-        .number.visible { transform: translateY(0) scale(1); opacity: 1; }
-        .number.p-group { border-color: var(--primary-color); color: var(--primary-color); width: 4.5rem; }
-        .number.p-group::after { content: '${t('lotto_group')}'; font-size: 0.6rem; position: absolute; bottom: 4px; }
-        button#genBtn { font-size: 1.25rem; font-weight: 700; padding: 1.25em 2.5em; border: none; border-radius: 1.25rem; background: var(--primary-color); color: #12121a; cursor: pointer; transition: 0.3s; }
+        
+        .controls { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem; }
+        .tabs { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.4rem; border-radius: 1.25rem; }
+        .tab { padding: 0.6em 1.25em; border-radius: 1rem; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 0.9rem; color: var(--text-muted); }
+        .tab.active { background: var(--primary-color); color: #12121a; }
+        
+        .settings { display: flex; align-items: center; gap: 1rem; font-weight: 600; }
+        input[type="number"] { width: 60px; padding: 0.5rem; border-radius: 0.75rem; border: 1px solid var(--surface-border); background: rgba(255,255,255,0.05); color: var(--text-color); text-align: center; font-family: inherit; }
+
+        .results-container { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; }
+        .line { display: flex; gap: 0.5rem; justify-content: center; align-items: center; flex-wrap: wrap; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
+        .number { display: grid; place-content: center; width: 3rem; height: 3rem; font-size: 1.25rem; font-weight: 800; border-radius: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.5s; transform: scale(0.8); opacity: 0; position: relative; }
+        .number.visible { transform: scale(1); opacity: 1; }
+        
+        .bonus-sep { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); margin: 0 0.5rem; opacity: 0; transition: 0.5s; }
+        .bonus-sep.visible { opacity: 1; }
+        .number.bonus { border-color: var(--primary-color); color: var(--primary-color); }
+        .number.bonus::after { content: '${t('lotto_bonus')}'; font-size: 0.5rem; position: absolute; bottom: 2px; }
+        
+        .number.p-group { border-color: var(--primary-color); color: var(--primary-color); width: 3.5rem; }
+        .number.p-group::after { content: '${t('lotto_group')}'; font-size: 0.5rem; position: absolute; bottom: 2px; }
+
+        button#genBtn { font-size: 1.25rem; font-weight: 700; padding: 1.25em 3em; border: none; border-radius: 1.25rem; background: var(--primary-color); color: #12121a; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        button#genBtn:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
       </style>
+      
       <h1>${t('card_lotto_title')}</h1>
-      <div class="tabs">
-        <div class="tab ${this.type === '645' ? 'active' : ''}" data-type="645">${t('lotto_type_645')}</div>
-        <div class="tab ${this.type === 'pension' ? 'active' : ''}" data-type="pension">${t('lotto_type_pension')}</div>
+      
+      <div class="controls">
+        <div class="tabs">
+          <div class="tab ${this.type === '645' ? 'active' : ''}" data-type="645">${t('lotto_type_645')}</div>
+          <div class="tab ${this.type === 'pension' ? 'active' : ''}" data-type="pension">${t('lotto_type_pension')}</div>
+        </div>
+        <div class="settings">
+          <label>${t('lotto_count')}</label>
+          <input type="number" id="countInput" value="${this.count}" min="1" max="5">
+        </div>
       </div>
-      <div class="numbers" id="numContainer">
-        ${this.type === '645' ? Array(6).fill('<div class="number">?</div>').join('') : '<div class="number p-group">?</div>' + Array(6).fill('<div class="number">?</div>').join('')}
+
+      <div class="results-container" id="results">
+        ${this.getPlaceholderLines()}
       </div>
+      
       <button id="genBtn">${t('lotto_btn')}</button>
     `;
+
     this.shadowRoot.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => { this.type = tab.dataset.type; this.render(); });
     });
+    
+    this.shadowRoot.querySelector('#countInput').addEventListener('change', (e) => {
+      this.count = Math.max(1, Math.min(5, parseInt(e.target.value) || 1));
+      this.render();
+    });
+
     this.shadowRoot.querySelector('#genBtn').addEventListener('click', () => this.generate());
   }
-  generate() {
-    const slots = this.shadowRoot.querySelectorAll('.number');
-    let res = [];
-    if (this.type === '645') {
-      const n = new Set(); while(n.size < 6) n.add(Math.floor(Math.random() * 45) + 1);
-      res = [...n].sort((a, b) => a - b);
-    } else {
-      res = [Math.floor(Math.random() * 5) + 1, ...Array.from({length: 6}, () => Math.floor(Math.random() * 10))];
+
+  getPlaceholderLines() {
+    let html = '';
+    for(let l=0; l<this.count; l++) {
+      html += `<div class="line">`;
+      if (this.type === '645') {
+        html += Array(6).fill('<div class="number">?</div>').join('') + `<div class="bonus-sep">+</div><div class="number bonus">?</div>`;
+      } else {
+        html += `<div class="number p-group">?</div>` + Array(6).fill('<div class="number">?</div>').join('');
+      }
+      html += `</div>`;
     }
-    slots.forEach((el, i) => {
-      el.classList.remove('visible');
-      setTimeout(() => {
-        el.textContent = res[i];
-        const hue = (res[i] * (this.type==='645'?10:40) + i*20) % 360;
-        el.style.background = `oklch(75% 0.15 ${hue} / 20%)`;
-        el.classList.add('visible');
-      }, i * 150);
+    return html;
+  }
+
+  generate() {
+    const lines = this.shadowRoot.querySelectorAll('.line');
+    
+    lines.forEach((line, lineIdx) => {
+      const slots = line.querySelectorAll('.number');
+      const sep = line.querySelector('.bonus-sep');
+      let res = [];
+      
+      if (this.type === '645') {
+        const n = new Set(); while(n.size < 7) n.add(Math.floor(Math.random() * 45) + 1);
+        const arr = Array.from(n);
+        const main = arr.slice(0, 6).sort((a,b) => a-b);
+        res = [...main, arr[6]];
+      } else {
+        res = [Math.floor(Math.random() * 5) + 1, ...Array.from({length: 6}, () => Math.floor(Math.random() * 10))];
+      }
+
+      slots.forEach((el, i) => {
+        el.classList.remove('visible');
+        if(sep) sep.classList.remove('visible');
+        
+        setTimeout(() => {
+          el.textContent = res[i];
+          const hue = (res[i] * (this.type==='645'?10:40) + i*20 + lineIdx*30) % 360;
+          el.style.background = `oklch(75% 0.15 ${hue} / 20%)`;
+          el.style.borderColor = `oklch(75% 0.15 ${hue} / 40%)`;
+          el.classList.add('visible');
+          if(sep && i === 5) sep.classList.add('visible');
+        }, (lineIdx * 200) + (i * 100));
+      });
     });
   }
 }
@@ -140,7 +203,7 @@ class DailyFortune extends HTMLElement {
   connectedCallback() { this.renderInput(); }
   renderInput() {
     this.shadowRoot.innerHTML = `
-      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;backdrop-filter:blur(40px);border:1px solid var(--surface-border);text-align:center;}h2{font-size:2.5rem;margin:0 0 2rem;color:var(--text-color);}.form{display:grid;gap:1.5rem;text-align:left;max-width:400px;margin:0 auto;}.field{display:flex;flex-direction:column;gap:0.5rem;}label{font-size:0.9rem;font-weight:600;color:var(--text-muted);}input,select{padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--text-color);font-family:inherit;}select option{background-color:#1a1a2e;color:#fff;}button{margin-top:1rem;padding:1.25rem;border-radius:1rem;border:none;background:var(--primary-color);color:#12121a;font-weight:700;cursor:pointer;transition:0.3s;}</style>
+      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;backdrop-filter:blur(40px);border:1px solid var(--surface-border);text-align:center;}h2{font-size:2.5rem;margin:0 0 2rem;color:var(--text-color);}.form{display:grid;gap:1.5rem;text-align:left;max-width:400px;margin:0 auto;}.field{display:flex;flex-direction:column;gap:0.5rem;}label{font-size:0.9rem;font-weight:600;color:var(--text-muted);}input,select{padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--text-color);font-family:inherit;}select option{background-color:#1a1a2e;color:#fff;}button{margin-top:1rem;padding:1.25rem;border-radius:1rem;border:none;background:var(--primary-color);color:#12121a;font-weight:700;cursor:pointer;transition:0.3s;}button:hover{transform:translateY(-2px);filter:brightness(1.1);}</style>
       <h2>${t('card_fortune_title')}</h2><div class="form"><div class="field"><label>${t('fortune_birthdate')}</label><input type="date" id="dob" required></div><div class="field"><label>${t('fortune_birthtime')}</label><select id="tob"><option value="unknown">${t('fortune_unknown_time')}</option>${Array.from({length:12},(_,i)=>`<option value="${i}">${jiJi[i]} (${['23:30-01:29','01:30-03:29','03:30-05:29','05:30-07:29','07:30-09:29','09:30-11:29','11:30-13:29','13:30-15:29','15:30-17:29','17:30-19:29','19:30-21:29','21:30-23:29'][i]})</option>`).join('')}</select></div><button id="sub">${t('fortune_btn')}</button></div>
     `;
     this.shadowRoot.querySelector('#sub').addEventListener('click', () => this.calculate());
