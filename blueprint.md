@@ -2,7 +2,7 @@
 
 ## Overview
 
-A modern, framework-less web application that functions as a visually appealing "Lucky Hub" sanctuary. It features multiple spiritual and luck-based interactive tools in a focused, multi-page layout.
+A modern, framework-less web application that functions as a visually appealing "Lucky Hub" sanctuary. It features multiple spiritual and luck-based interactive tools in a focused, multi-page layout with automatic multi-language support.
 
 ## Project Outline
 
@@ -13,6 +13,7 @@ A modern, framework-less web application that functions as a visually appealing 
 *   **Typography:** Expressive 'Inter' typography with bold headings and readable body text.
 
 ### Features & Pages
+*   **Multi-Language Support (i18n):** Automatic detection of user language (English/Korean) with a comprehensive translation engine for all UI elements and content.
 *   **Home Hub:** A central landing page (`index.html`) introducing all spiritual tools.
 *   **Lucky Numbers (`lotto.html`):** Interactive lotto number generator with satisfying animations.
 *   **Daily Insight (`fortune.html`):** Personal spiritual messages for the user's day.
@@ -22,12 +23,14 @@ A modern, framework-less web application that functions as a visually appealing 
 
 ## Current Plan
 
-**Request:** "타로 카드를 ... 사실적으로 만들면 어떨까? 그리고 해설이 있어야대. 질문자의 상황에 맞게..." (Make Tarot realistic with Rider-Waite cards and contextual explanations)
+**Request:** "방문자의 기본설정 언어에 맞게 보여지는 언어가 바뀌는 사이트 기능을 넣고싶네" (Add automatic language switching based on visitor's settings)
 
 **Steps:**
 
-1.  **Refactor `TarotReader` in `main.js`:**
-    *   Implement full `Major Arcana` dataset with high-quality Wikimedia Commons images.
-    *   Add specific interpretations for `General`, `Love`, and `Career` contexts.
-    *   Enhance UI with a "Concern Selector" and realistic card flip animations using 3D transforms.
-2.  **Push to GitHub:** Commit and push the realistic Tarot upgrade.
+1.  **Refactor `main.js`:**
+    *   Implement a translation dictionary for English and Korean.
+    *   Add language detection logic using `navigator.language`.
+    *   Update all Web Components to use translated strings.
+    *   Add a `translatePage()` helper to handle static HTML elements with `data-i18n`.
+2.  **Update HTML Files:** Add `data-i18n` attributes to all static text in all pages.
+3.  **Push to GitHub:** Commit and push the multi-language expansion.
