@@ -8,68 +8,49 @@ class LottoGenerator extends HTMLElement {
         :host {
           display: block;
           text-align: center;
-          padding: 2rem;
+          padding: 2.5rem;
           background: var(--surface-color);
-          border-radius: 1rem;
+          border-radius: 2rem;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--surface-border);
           box-shadow: 
-            0 10px 30px -15px oklch(from var(--primary-color) calc(l - 0.1) c h),
-            0 0 0 1px oklch(from var(--primary-color) calc(l + 0.1) c h / 25%);
+            0 20px 50px -15px oklch(from var(--primary-color) l c h / 30%),
+            inset 0 1px 1px oklch(100% 0 0 / 15%);
         }
         h1 {
           font-size: 2.5rem;
-          margin-bottom: 1.5rem;
+          font-weight: 800;
+          margin-bottom: 2rem;
           color: var(--text-color);
-          letter-spacing: -1px;
+          letter-spacing: -0.05em;
+          line-height: 1;
         }
         .numbers {
           display: flex;
           gap: 0.75rem;
           justify-content: center;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          flex-wrap: wrap;
         }
         .number {
           display: grid;
           place-content: center;
-          width: 3.5rem;
-          height: 3.5rem;
+          width: 3.75rem;
+          height: 3.75rem;
           font-size: 1.5rem;
-          font-weight: bold;
-          border-radius: 50%;
-          background: oklch(from var(--primary-color) calc(l - 0.2) c h);
+          font-weight: 700;
+          border-radius: 1.25rem;
+          background: oklch(from var(--text-color) l c h / 5%);
           color: var(--text-color);
-          box-shadow: inset 0 2px 5px oklch(0 0 0 / 25%);
-          transition: all 0.3s ease;
-          transform: scale(0);
+          border: 1px solid oklch(from var(--text-color) l c h / 10%);
+          transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+          transform: translateY(20px) scale(0.8);
+          opacity: 0;
         }
         .number.visible {
-            transform: scale(1);
-        }
-
-        button {
-          font-size: 1.2rem;
-          font-weight: 500;
-          padding: 0.75em 1.5em;
-          border: none;
-          border-radius: 0.5rem;
-          background: var(--primary-color);
-          color: oklch(20% 0.05 var(--base-hue));
-          cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 
-            0 0 0 0 oklch(from var(--primary-color) l c h / 50%),
-            0 4px 10px -4px oklch(0 0 0 / 40%);
-        }
-        button:hover, button:focus-visible {
-          box-shadow: 
-            0 0 0 4px oklch(from var(--primary-color) l c h / 50%),
-            0 4px 10px -4px oklch(0 0 0 / 40%);
-          transform: translateY(-2px);
-        }
-        button:active {
-            transform: translateY(0);
-            box-shadow: 
-            0 0 0 0 oklch(from var(--primary-color) l c h / 50%),
-            0 2px 5px -2px oklch(0 0 0 / 40%);
+          transform: translateY(0) scale(1);
+          opacity: 1;
         }
 
         .controls {
@@ -78,20 +59,50 @@ class LottoGenerator extends HTMLElement {
           justify-content: center;
         }
 
+        button {
+          font-size: 1.1rem;
+          font-weight: 600;
+          padding: 1em 2em;
+          border: none;
+          border-radius: 1rem;
+          background: var(--primary-color);
+          color: oklch(15% 0.05 var(--base-hue));
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 10px 25px -5px oklch(from var(--primary-color) l c h / 40%);
+        }
+
+        button:hover {
+          transform: translateY(-2px);
+          filter: brightness(1.1);
+          box-shadow: 0 15px 30px -5px oklch(from var(--primary-color) l c h / 50%);
+        }
+
+        button:active {
+          transform: translateY(1px);
+        }
+
         .secondary-button {
-          background: var(--surface-color);
+          background: oklch(from var(--text-color) l c h / 5%);
           color: var(--text-color);
-          border: 1px solid oklch(from var(--text-color) l c h / 10%);
+          border: 1px solid oklch(from var(--text-color) l c h / 15%);
+          box-shadow: none;
+          backdrop-filter: blur(10px);
+        }
+        
+        .secondary-button:hover {
+          background: oklch(from var(--text-color) l c h / 10%);
+          box-shadow: 0 10px 20px -5px oklch(0% 0 0 / 20%);
         }
 
       </style>
-      <h1>Lotto Number Generator</h1>
+      <h1>Lucky Numbers</h1>
       <div class="numbers">
         ${Array(6).fill('<div class="number">?</div>').join('')}
       </div>
       <div class="controls">
-        <button id="generateBtn">Generate Numbers</button>
-        <button id="themeToggle" class="secondary-button">Toggle Theme</button>
+        <button id="generateBtn">Generate</button>
+        <button id="themeToggle" class="secondary-button">Theme</button>
       </div>
     `;
 
@@ -102,7 +113,6 @@ class LottoGenerator extends HTMLElement {
     this.button.addEventListener('click', this.generateNumbers.bind(this));
     this.themeToggle.addEventListener('click', this.toggleTheme.bind(this));
 
-    // Initialize theme from storage
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
   }
@@ -126,12 +136,14 @@ class LottoGenerator extends HTMLElement {
         el.classList.remove('visible');
         setTimeout(() => {
             el.textContent = sortedNumbers[i];
-            el.style.setProperty('--hue', (sortedNumbers[i] * 10) % 360);
-            el.style.background = `oklch(70% 0.2 var(--hue))`;
+            const hue = (sortedNumbers[i] * 10) % 360;
+            el.style.background = `oklch(75% 0.15 ${hue} / 15%)`;
+            el.style.borderColor = `oklch(75% 0.15 ${hue} / 40%)`;
+            el.style.color = `oklch(85% 0.1 ${hue})`;
+            el.style.boxShadow = `0 10px 20px -5px oklch(75% 0.15 ${hue} / 30%)`;
             el.classList.add('visible');
         }, i * 100);
     });
-
   }
 }
 
@@ -146,21 +158,26 @@ class ContactForm extends HTMLElement {
       <style>
         :host {
           display: block;
-          margin-top: 2rem;
-          padding: 2rem;
+          padding: 2.5rem;
           background: var(--surface-color);
-          border-radius: 1rem;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          text-align: left;
+          border-radius: 2rem;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--surface-border);
+          box-shadow: 0 10px 30px -10px oklch(0% 0 0 / 20%);
         }
         h2 {
+          font-size: 1.75rem;
+          font-weight: 800;
           margin-top: 0;
+          margin-bottom: 1.5rem;
           color: var(--text-color);
+          letter-spacing: -0.04em;
         }
         form {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.5rem;
         }
         .field {
           display: flex;
@@ -168,41 +185,55 @@ class ContactForm extends HTMLElement {
           gap: 0.5rem;
         }
         label {
-          font-weight: 500;
-          color: var(--text-color);
-          opacity: 0.8;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--text-muted);
+          margin-left: 0.25rem;
         }
         input, textarea {
-          padding: 0.75rem;
-          border-radius: 0.5rem;
-          border: 1px solid oklch(from var(--text-color) l c h / 20%);
-          background: oklch(from var(--surface-color) calc(l - 0.05) c h);
+          padding: 1rem;
+          border-radius: 1rem;
+          border: 1px solid oklch(from var(--text-color) l c h / 10%);
+          background: oklch(from var(--text-color) l c h / 3%);
           color: var(--text-color);
           font-family: inherit;
+          font-size: 1rem;
+          transition: all 0.2s ease;
+        }
+        input:focus, textarea:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          background: oklch(from var(--text-color) l c h / 5%);
+          box-shadow: 0 0 0 4px oklch(from var(--primary-color) l c h / 10%);
         }
         button {
-          padding: 0.75rem;
-          border-radius: 0.5rem;
+          margin-top: 0.5rem;
+          padding: 1rem;
+          border-radius: 1rem;
           border: none;
           background: var(--primary-color);
-          color: oklch(20% 0.05 var(--base-hue));
-          font-weight: bold;
+          color: oklch(15% 0.05 var(--base-hue));
+          font-weight: 700;
+          font-size: 1.1rem;
           cursor: pointer;
-          transition: transform 0.2s;
+          transition: all 0.3s ease;
+          box-shadow: 0 10px 20px -5px oklch(from var(--primary-color) l c h / 30%);
         }
         button:hover {
           transform: translateY(-2px);
+          filter: brightness(1.1);
+          box-shadow: 0 15px 30px -5px oklch(from var(--primary-color) l c h / 40%);
         }
       </style>
-      <h2>Contact Us</h2>
+      <h2>Get in touch</h2>
       <form action="https://formspree.io/f/mpqjlvro" method="POST">
         <div class="field">
-          <label>Your Email:</label>
-          <input type="email" name="email" required placeholder="email@example.com">
+          <label>Email Address</label>
+          <input type="email" name="email" required placeholder="name@company.com">
         </div>
         <div class="field">
-          <label>Your Message:</label>
-          <textarea name="message" rows="4" required placeholder="How can we help?"></textarea>
+          <label>Message</label>
+          <textarea name="message" rows="4" required placeholder="How can we help you?"></textarea>
         </div>
         <button type="submit">Send Message</button>
       </form>
