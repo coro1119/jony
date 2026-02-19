@@ -11,6 +11,7 @@ const translations = {
     card_tarot_title: "Tarot Reading", card_tarot_desc: "Deep insight into your past, present, and future with a 3-card spread.",
     footer_text: "© 2026 Lucky Hub. All paths lead to wisdom.",
     lotto_btn: "Reveal My Luck",
+    lotto_type_645: "Lotto 6/45", lotto_type_pension: "Pension 720+", lotto_group: "Grp",
     fortune_birthdate: "Birth Date", fortune_birthtime: "Birth Time", fortune_gender: "Gender",
     fortune_male: "Male", fortune_female: "Female", fortune_btn: "Analyze My Destiny",
     fortune_unknown_time: "Unknown", fortune_calculating: "Calculating Four Pillars...",
@@ -36,6 +37,7 @@ const translations = {
     card_tarot_title: "타로 상담", card_tarot_desc: "3카드 스프레드를 통해 과거, 현재, 미래를 깊이 있게 들여다보세요.",
     footer_text: "© 2026 럭키 허브. 모든 길은 지혜로 통합니다.",
     lotto_btn: "번호 추첨하기",
+    lotto_type_645: "로또 6/45", lotto_type_pension: "연금복권 720+", lotto_group: "조",
     fortune_birthdate: "생년월일", fortune_birthtime: "태어난 시간", fortune_gender: "성별",
     fortune_male: "남성", fortune_female: "여성", fortune_btn: "사주 분석하기",
     fortune_unknown_time: "모름/기타", fortune_calculating: "만세력을 계산 중입니다...",
@@ -74,12 +76,71 @@ const getHash = (seed) => {
 
 // --- COMPONENTS ---
 
+class LottoGenerator extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.type = '645';
+  }
+  connectedCallback() { this.render(); }
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 3rem; backdrop-filter: blur(40px); border: 1px solid var(--surface-border); text-align: center; color: var(--text-color); }
+        h1 { font-size: 3rem; font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.06em; }
+        .tabs { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
+        .tab { padding: 0.8em 1.5em; border-radius: 1rem; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); font-weight: 600; color: var(--text-muted); }
+        .tab.active { background: var(--primary-color); color: #12121a; border-color: transparent; }
+        .numbers { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; flex-wrap: wrap; }
+        .number { display: grid; place-content: center; width: 3.5rem; height: 3.5rem; font-size: 1.5rem; font-weight: 800; border-radius: 1.25rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.6s; transform: translateY(20px) scale(0.5); opacity: 0; position: relative; }
+        .number.visible { transform: translateY(0) scale(1); opacity: 1; }
+        .number.p-group { border-color: var(--primary-color); color: var(--primary-color); width: 4.5rem; }
+        .number.p-group::after { content: '${t('lotto_group')}'; font-size: 0.6rem; position: absolute; bottom: 4px; }
+        button#genBtn { font-size: 1.25rem; font-weight: 700; padding: 1.25em 2.5em; border: none; border-radius: 1.25rem; background: var(--primary-color); color: #12121a; cursor: pointer; transition: 0.3s; }
+      </style>
+      <h1>${t('card_lotto_title')}</h1>
+      <div class="tabs">
+        <div class="tab ${this.type === '645' ? 'active' : ''}" data-type="645">${t('lotto_type_645')}</div>
+        <div class="tab ${this.type === 'pension' ? 'active' : ''}" data-type="pension">${t('lotto_type_pension')}</div>
+      </div>
+      <div class="numbers" id="numContainer">
+        ${this.type === '645' ? Array(6).fill('<div class="number">?</div>').join('') : '<div class="number p-group">?</div>' + Array(6).fill('<div class="number">?</div>').join('')}
+      </div>
+      <button id="genBtn">${t('lotto_btn')}</button>
+    `;
+    this.shadowRoot.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => { this.type = tab.dataset.type; this.render(); });
+    });
+    this.shadowRoot.querySelector('#genBtn').addEventListener('click', () => this.generate());
+  }
+  generate() {
+    const slots = this.shadowRoot.querySelectorAll('.number');
+    let res = [];
+    if (this.type === '645') {
+      const n = new Set(); while(n.size < 6) n.add(Math.floor(Math.random() * 45) + 1);
+      res = [...n].sort((a, b) => a - b);
+    } else {
+      res = [Math.floor(Math.random() * 5) + 1, ...Array.from({length: 6}, () => Math.floor(Math.random() * 10))];
+    }
+    slots.forEach((el, i) => {
+      el.classList.remove('visible');
+      setTimeout(() => {
+        el.textContent = res[i];
+        const hue = (res[i] * (this.type==='645'?10:40) + i*20) % 360;
+        el.style.background = `oklch(75% 0.15 ${hue} / 20%)`;
+        el.classList.add('visible');
+      }, i * 150);
+    });
+  }
+}
+customElements.define('lotto-generator', LottoGenerator);
+
 class DailyFortune extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }); }
   connectedCallback() { this.renderInput(); }
   renderInput() {
     this.shadowRoot.innerHTML = `
-      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;backdrop-filter:blur(40px);border:1px solid var(--surface-border);text-align:center;}h2{font-size:2.5rem;margin:0 0 2rem;color:var(--text-color);}.form{display:grid;gap:1.5rem;text-align:left;max-width:400px;margin:0 auto;}.field{display:flex;flex-direction:column;gap:0.5rem;}label{font-size:0.9rem;font-weight:600;color:var(--text-muted);}input,select{padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--text-color);font-family:inherit;}select option{background-color:#1a1a2e;color:#fff;}button{margin-top:1rem;padding:1.25rem;border-radius:1rem;border:none;background:var(--primary-color);color:#12121a;font-weight:700;cursor:pointer;transition:0.3s;}button:hover{transform:translateY(-2px);filter:brightness(1.1);}</style>
+      <style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;backdrop-filter:blur(40px);border:1px solid var(--surface-border);text-align:center;}h2{font-size:2.5rem;margin:0 0 2rem;color:var(--text-color);}.form{display:grid;gap:1.5rem;text-align:left;max-width:400px;margin:0 auto;}.field{display:flex;flex-direction:column;gap:0.5rem;}label{font-size:0.9rem;font-weight:600;color:var(--text-muted);}input,select{padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--text-color);font-family:inherit;}select option{background-color:#1a1a2e;color:#fff;}button{margin-top:1rem;padding:1.25rem;border-radius:1rem;border:none;background:var(--primary-color);color:#12121a;font-weight:700;cursor:pointer;transition:0.3s;}</style>
       <h2>${t('card_fortune_title')}</h2><div class="form"><div class="field"><label>${t('fortune_birthdate')}</label><input type="date" id="dob" required></div><div class="field"><label>${t('fortune_birthtime')}</label><select id="tob"><option value="unknown">${t('fortune_unknown_time')}</option>${Array.from({length:12},(_,i)=>`<option value="${i}">${jiJi[i]} (${['23:30-01:29','01:30-03:29','03:30-05:29','05:30-07:29','07:30-09:29','09:30-11:29','11:30-13:29','13:30-15:29','15:30-17:29','17:30-19:29','19:30-21:29','21:30-23:29'][i]})</option>`).join('')}</select></div><button id="sub">${t('fortune_btn')}</button></div>
     `;
     this.shadowRoot.querySelector('#sub').addEventListener('click', () => this.calculate());
@@ -170,18 +231,6 @@ class TarotReader extends HTMLElement {
   }
 }
 customElements.define('tarot-reader', TarotReader);
-
-class LottoGenerator extends HTMLElement {
-  constructor() { super(); this.attachShadow({ mode: 'open' }); }
-  connectedCallback() {
-    this.shadowRoot.innerHTML = `<style>:host{display:block;padding:3rem;background:var(--surface-color);border-radius:3rem;text-align:center;}h1{font-size:3rem;font-weight:900;margin-bottom:2rem;color:var(--text-color);}.numbers{display:flex;gap:1rem;justify-content:center;margin-bottom:3rem;flex-wrap:wrap;}.number{display:grid;place-content:center;width:4.5rem;height:4.5rem;font-size:1.75rem;font-weight:800;border-radius:1.5rem;background:rgba(255,255,255,0.05);color:var(--text-color);border:1px solid rgba(255,255,255,0.1);transition:0.6s;transform:translateY(30px) scale(0.5);opacity:0;}.number.visible{transform:translateY(0) scale(1);opacity:1;}button{font-size:1.25rem;font-weight:700;padding:1.25em 2.5em;border:none;border-radius:1.25rem;background:var(--primary-color);color:#12121a;cursor:pointer;}</style><h1>${t('card_lotto_title')}</h1><div class="numbers">${Array(6).fill('<div class="number">?</div>').join('')}</div><button id="btn">${t('lotto_btn')}</button>`;
-    this.shadowRoot.querySelector('#btn').addEventListener('click',()=>{
-      const n=new Set(); while(n.size<6) n.add(Math.floor(Math.random()*45)+1); const s=[...n].sort((a,b)=>a-b);
-      this.shadowRoot.querySelectorAll('.number').forEach((el,i)=>{ el.classList.remove('visible'); setTimeout(()=>{ el.textContent=s[i]; el.style.background=`oklch(75% 0.15 ${(s[i]*10)%360} / 20%)`; el.classList.add('visible'); },i*150); });
-    });
-  }
-}
-customElements.define('lotto-generator', LottoGenerator);
 
 class FortuneCookie extends HTMLElement {
   constructor() { super(); this.attachShadow({ mode: 'open' }); }
