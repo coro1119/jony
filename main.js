@@ -1,3 +1,4 @@
+// Lucky Hub Main Script - Web Components Definitions
 class LottoGenerator extends HTMLElement {
   constructor() {
     super();
