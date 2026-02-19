@@ -14,23 +14,27 @@ A modern, framework-less web application that functions as a visually appealing 
 
 ### Features & Pages
 *   **Multi-Language Support (i18n):** Automatic detection of user language (English/Korean) with a comprehensive translation engine for all UI elements and content.
-*   **Home Hub:** A central landing page (`index.html`) introducing all spiritual tools.
+*   **Home Hub (`index.html`):** A central landing page introducing all spiritual tools.
 *   **Lucky Numbers (`lotto.html`):** Interactive lotto number generator with satisfying animations.
-*   **Daily Insight (`fortune.html`):** Personal spiritual messages for the user's day.
+*   **Daily Saju (`fortune.html`):** Traditional personalized daily fortune based on birth details (Date, traditional 2-hour Time blocks, Gender).
+*   **New Year 2026 (`newyear.html`):** Detailed yearly Saju-based outlook for the year of the Red Horse.
+*   **Zodiac Fortune (`zodiac.html`):** Daily guidance based on the Chinese Animal Zodiac.
+*   **Horoscope (`horoscope.html`):** Daily energy reading based on Western Astrological signs.
 *   **Fortune Cookie (`cookie.html`):** Interactive 3D-like cookie cracking experience.
 *   **Tarot Reading (`tarot.html`):** An advanced 3-card spread (Past, Present, Future) using the **22 Major Arcana** cards from the Rider-Waite deck. Includes contextual interpretations for General, Love, and Career concerns.
 *   **Contact & Community:** Integrated Formspree contact form and Disqus comment system on every tool page.
 
 ## Current Plan
 
-**Request:** "방문자의 기본설정 언어에 맞게 보여지는 언어가 바뀌는 사이트 기능을 넣고싶네" (Add automatic language switching based on visitor's settings)
+**Request:** "신년운세, 띠별운세, 별자리운세 파트들도 새로 만들어주렴... 태어난시간 부분... 23:30-01:29 부터 시작이거든." (Add New Year, Zodiac, Horoscope features and correct Saju time logic)
 
 **Steps:**
 
 1.  **Refactor `main.js`:**
-    *   Implement a translation dictionary for English and Korean.
-    *   Add language detection logic using `navigator.language`.
-    *   Update all Web Components to use translated strings.
-    *   Add a `translatePage()` helper to handle static HTML elements with `data-i18n`.
-2.  **Update HTML Files:** Add `data-i18n` attributes to all static text in all pages.
-3.  **Push to GitHub:** Commit and push the multi-language expansion.
+    *   Implement `NewYearFortune`, `ZodiacFortune`, and `HoroscopeFortune` components.
+    *   Correct Saju birth time options to use traditional 2-hour blocks starting from 23:30 (Jasi).
+    *   Expand translation dictionary for new features.
+2.  **Create/Update HTML Files:**
+    *   Create `newyear.html`, `zodiac.html`, `horoscope.html`.
+    *   Update navigation menu in all pages to include the new features.
+3.  **Push to GitHub:** Commit and push the massive expansion.
