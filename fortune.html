@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Insight - Lucky Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="lotto.html">Lotto</a>
+        <a href="fortune.html" class="active">Daily Fortune</a>
+        <a href="cookie.html">Fortune Cookie</a>
+        <a href="tarot.html">Tarot</a>
+    </nav>
+
+    <main>
+        <daily-fortune></daily-fortune>
+        
+        <div id="disqus_thread"></div>
+        <script>
+            (function() {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://coro-1.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    </main>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

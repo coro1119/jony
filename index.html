@@ -3,63 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Hub - Lotto & Fortune</title>
+    <title>Lucky Hub - Your Spiritual Sanctuary</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #disqus_thread {
-            margin-top: 3rem;
-            padding: 2rem;
-            background: var(--surface-color);
-            border-radius: 1rem;
-            min-height: 300px;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            width: 100%;
-            max-width: 800px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            width: 100%;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <lotto-generator></lotto-generator>
-        
-        <div class="grid">
-            <daily-fortune></daily-fortune>
-            <fortune-cookie></fortune-cookie>
-            <tarot-reader></tarot-reader>
-        </div>
+    <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="lotto.html">Lotto</a>
+        <a href="fortune.html">Daily Fortune</a>
+        <a href="cookie.html">Fortune Cookie</a>
+        <a href="tarot.html">Tarot</a>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>Lucky Hub</h1>
+            <p>Step into your spiritual sanctuary. Explore the mysteries of luck, destiny, and the universe through our modern interactive experiences.</p>
+        </section>
+
+        <section class="hub-grid">
+            <a href="lotto.html" class="hub-card">
+                <div class="icon">🎰</div>
+                <h3>Lucky Numbers</h3>
+                <p>Generate your winning combination with our advanced lotto engine.</p>
+            </a>
+            <a href="fortune.html" class="hub-card">
+                <div class="icon">✨</div>
+                <h3>Daily Insight</h3>
+                <p>Receive your personal daily spiritual message from the universe.</p>
+            </a>
+            <a href="cookie.html" class="hub-card">
+                <div class="icon">🥠</div>
+                <h3>Fortune Cookie</h3>
+                <p>Crack open a piece of wisdom and see what the day holds for you.</p>
+            </a>
+            <a href="tarot.html" class="hub-card">
+                <div class="icon">🔮</div>
+                <h3>Tarot Reading</h3>
+                <p>Dive deep into your past, present, and future with a 3-card spread.</p>
+            </a>
+        </section>
 
         <contact-form></contact-form>
-        
-        <div id="disqus_thread"></div>
-        <script>
-            /**
-            *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-            *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
-            /*
-            var disqus_config = function () {
-            this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-            this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-            };
-            */
-            (function() { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://coro-1.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-            })();
-        </script>
-        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Lucky Hub. All paths lead to wisdom.</p>
+    </footer>
 
     <script type="module" src="main.js"></script>
 </body>
