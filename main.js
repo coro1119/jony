@@ -136,3 +136,78 @@ class LottoGenerator extends HTMLElement {
 }
 
 customElements.define('lotto-generator', LottoGenerator);
+
+class ContactForm extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+
+    shadow.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          margin-top: 2rem;
+          padding: 2rem;
+          background: var(--surface-color);
+          border-radius: 1rem;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          text-align: left;
+        }
+        h2 {
+          margin-top: 0;
+          color: var(--text-color);
+        }
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        label {
+          font-weight: 500;
+          color: var(--text-color);
+          opacity: 0.8;
+        }
+        input, textarea {
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          border: 1px solid oklch(from var(--text-color) l c h / 20%);
+          background: oklch(from var(--surface-color) calc(l - 0.05) c h);
+          color: var(--text-color);
+          font-family: inherit;
+        }
+        button {
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          border: none;
+          background: var(--primary-color);
+          color: oklch(20% 0.05 var(--base-hue));
+          font-weight: bold;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        button:hover {
+          transform: translateY(-2px);
+        }
+      </style>
+      <h2>Contact Us</h2>
+      <form action="https://formspree.io/f/mpqjlvro" method="POST">
+        <div class="field">
+          <label>Your Email:</label>
+          <input type="email" name="email" required placeholder="email@example.com">
+        </div>
+        <div class="field">
+          <label>Your Message:</label>
+          <textarea name="message" rows="4" required placeholder="How can we help?"></textarea>
+        </div>
+        <button type="submit">Send Message</button>
+      </form>
+    `;
+  }
+}
+
+customElements.define('contact-form', ContactForm);

@@ -14,18 +14,19 @@ A modern, framework-less web application that functions as a visually appealing 
 *   **Themes:** Support for both Dark and Light modes with persistent storage.
 
 ### Features
-*   **Web Components:** A reusable `<lotto-generator>` component.
+*   **Web Components:** Reusable `<lotto-generator>` and `<contact-form>` components.
 *   **ES Modules:** Organized and maintainable JavaScript.
 *   **Lotto Number Generation:** Generates 6 unique random numbers.
 *   **Theme Switcher:** Toggle between light and dark themes.
+*   **Contact Form:** Integration with Formspree for handling messages.
 
 ## Current Plan
 
-**Request:** "다크모드 화이트모드 추가해서 git push로 배포까지 해줘" (Add dark/light mode and push to git for deployment)
+**Request:** "formspree 제휴 받을수있는 간단한 폼 만들어줘. https://formspree.io/f/mpqjlvro" (Create a simple contact form with Formspree integration)
 
 **Steps:**
 
-1.  **Update `style.css`:** Define light mode color overrides using `[data-theme="light"]`.
-2.  **Update `main.js`:** Add theme toggle button to the `LottoGenerator` component and implement theme switching logic with `localStorage`.
-3.  **Update `blueprint.md`:** Document the new theme features.
-4.  **Push to GitHub:** Commit and push the changes to the remote repository.
+1.  **Update `main.js`:** Create the `ContactForm` web component with Formspree endpoint integration.
+2.  **Update `index.html`:** Add the `<contact-form>` component.
+3.  **Update `blueprint.md`:** Document the new contact form feature.
+4.  **Push to GitHub:** Commit and push the changes.
