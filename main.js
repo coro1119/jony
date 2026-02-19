@@ -1,4 +1,5 @@
 // Lucky Hub Main Script - Web Components Definitions
+
 class LottoGenerator extends HTMLElement {
   constructor() {
     super();
@@ -120,77 +121,309 @@ class TarotReader extends HTMLElement {
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
-    const cards = [
-      { name: "The Fool", meaning: "Potential, new beginnings, spontaneity.", img: "🃏" },
-      { name: "The Magician", meaning: "Manifestation, resourcefulness, power.", img: "🪄" },
-      { name: "The High Priestess", meaning: "Intuition, sacred knowledge, subconscious.", img: "🌙" },
-      { name: "The Empress", meaning: "Femininity, nature, abundance.", img: "🌿" },
-      { name: "The Emperor", meaning: "Authority, structure, solid foundation.", img: "👑" },
-      { name: "The Lovers", meaning: "Harmony, relationships, choices.", img: "❤️" },
-      { name: "The Chariot", meaning: "Control, willpower, victory.", img: "⚔️" },
-      { name: "Strength", meaning: "Courage, persuasion, influence.", img: "🦁" },
-      { name: "The Hermit", meaning: "Soul-searching, introspection, guidance.", img: "🕯️" },
-      { name: "Wheel of Fortune", meaning: "Luck, karma, life cycles.", img: "🎡" }
+    
+    // Detailed Major Arcana Data
+    this.deck = [
+      { name: "The Fool", img: "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg", 
+        meanings: { 
+          general: "New beginnings, optimism, trust in life.", 
+          love: "A new romance or fresh start. Be spontaneous.", 
+          career: "Take a leap of faith. A new job or creative project awaits." 
+        } 
+      },
+      { name: "The Magician", img: "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg", 
+        meanings: { 
+          general: "Action, power, manifestation.", 
+          love: "You have the power to attract what you desire.", 
+          career: "Use your skills and willpower to get things done." 
+        } 
+      },
+      { name: "The High Priestess", img: "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg", 
+        meanings: { 
+          general: "Intuition, sacred knowledge, subconscious mind.", 
+          love: "Trust your gut feelings about this relationship.", 
+          career: "Listen to your intuition; not everything is as it seems." 
+        } 
+      },
+      { name: "The Empress", img: "https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg", 
+        meanings: { 
+          general: "Femininity, beauty, nature, nurturing.", 
+          love: "A time of passion, connection, and fertility.", 
+          career: "Creativity is flowing. Nurture your ideas." 
+        } 
+      },
+      { name: "The Emperor", img: "https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg", 
+        meanings: { 
+          general: "Authority, structure, solid foundation.", 
+          love: "Stability and commitment. A partner who takes charge.", 
+          career: "Take a disciplined approach. Leadership is required." 
+        } 
+      },
+      { name: "The Hierophant", img: "https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg", 
+        meanings: { 
+          general: "Spiritual wisdom, religious beliefs, conformity.", 
+          love: "Traditional commitment, marriage, or shared values.", 
+          career: "Stick to the rules and established methods for now." 
+        } 
+      },
+      { name: "The Lovers", img: "https://upload.wikimedia.org/wikipedia/commons/3/3a/RWS_Tarot_06_Lovers.jpg", 
+        meanings: { 
+          general: "Love, harmony, relationships, choices.", 
+          love: "Deep connection, soulmates, or a significant choice in love.", 
+          career: "Partnerships and alignment of values in business." 
+        } 
+      },
+      { name: "The Chariot", img: "https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg", 
+        meanings: { 
+          general: "Control, willpower, victory, assertion.", 
+          love: "Overcoming obstacles to be together. Determination.", 
+          career: "Focus and drive will lead to victory. Stay the course." 
+        } 
+      },
+      { name: "Strength", img: "https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg", 
+        meanings: { 
+          general: "Courage, persuasion, influence, compassion.", 
+          love: "Patience and understanding will strengthen the bond.", 
+          career: "Quiet confidence and resilience will win the day." 
+        } 
+      },
+      { name: "The Hermit", img: "https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg", 
+        meanings: { 
+          general: "Soul-searching, introspection, being alone.", 
+          love: "A time to reflect on what you truly want alone.", 
+          career: "Step back and analyze your path. Seek mentorship." 
+        } 
+      },
+      { name: "Wheel of Fortune", img: "https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg", 
+        meanings: { 
+          general: "Good luck, karma, life cycles, destiny.", 
+          love: "Fated meetings or changes in relationship status.", 
+          career: "A turning point. Luck is on your side." 
+        } 
+      },
+      { name: "Justice", img: "https://upload.wikimedia.org/wikipedia/commons/e/e0/RWS_Tarot_11_Justice.jpg", 
+        meanings: { 
+          general: "Justice, fairness, truth, cause and effect.", 
+          love: "Treating each other with fairness. Truth coming out.", 
+          career: "Contracts, legal matters, and fair dealings." 
+        } 
+      },
+      { name: "The Hanged Man", img: "https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg", 
+        meanings: { 
+          general: "Pause, surrender, letting go, new perspectives.", 
+          love: "Letting go of control. Seeing things differently.", 
+          career: "A period of waiting. Use this time to rethink strategies." 
+        } 
+      },
+      { name: "Death", img: "https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg", 
+        meanings: { 
+          general: "Endings, change, transformation, transition.", 
+          love: "The end of a phase or relationship. Deep transformation.", 
+          career: "A job change or the end of a project. Renewal." 
+        } 
+      },
+      { name: "Temperance", img: "https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg", 
+        meanings: { 
+          general: "Balance, moderation, patience, purpose.", 
+          love: "Harmony and patience. Finding common ground.", 
+          career: "Stay balanced and avoid extremes. Cooperation." 
+        } 
+      },
+      { name: "The Devil", img: "https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg", 
+        meanings: { 
+          general: "Shadow self, attachment, addiction, restriction.", 
+          love: "Obsession or an unhealthy attachment. Lust.", 
+          career: "Feeling trapped in a job. Beware of unethical choices." 
+        } 
+      },
+      { name: "The Tower", img: "https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg", 
+        meanings: { 
+          general: "Sudden change, upheaval, chaos, revelation.", 
+          love: "A sudden breakup or realization. Shaking things up.", 
+          career: "Unexpected job loss or conflict. Rebuilding required." 
+        } 
+      },
+      { name: "The Star", img: "https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg", 
+        meanings: { 
+          general: "Hope, faith, purpose, renewal, spirituality.", 
+          love: "Healing past wounds. Optimism for the future.", 
+          career: "Inspiration and new opportunities. Follow your dreams." 
+        } 
+      },
+      { name: "The Moon", img: "https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg", 
+        meanings: { 
+          general: "Illusion, fear, anxiety, subconscious, intuition.", 
+          love: "Uncertainty or deception. Secrets may be revealed.", 
+          career: "Confusion about your path. Trust your intuition." 
+        } 
+      },
+      { name: "The Sun", img: "https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg", 
+        meanings: { 
+          general: "Positivity, fun, warmth, success, vitality.", 
+          love: "Joy, happiness, and engagement. Pure bliss.", 
+          career: "Success, recognition, and abundance." 
+        } 
+      },
+      { name: "Judgement", img: "https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgement.jpg", 
+        meanings: { 
+          general: "Judgement, rebirth, inner calling, absolution.", 
+          love: "A relationship renewal or making a clear decision.", 
+          career: "A calling to a new vocation. Evaluation of success." 
+        } 
+      },
+      { name: "The World", img: "https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg", 
+        meanings: { 
+          general: "Completion, integration, accomplishment, travel.", 
+          love: "Fulfillment and happiness. A cycle is complete.", 
+          career: "Reaching a major goal. Global opportunities." 
+        } 
+      }
     ];
+
     shadow.innerHTML = `
       <style>
         :host { display: block; padding: 4rem 2rem; background: var(--surface-color); border-radius: 3rem; backdrop-filter: blur(40px); border: 1px solid var(--surface-border); text-align: center; width: 100%; max-width: 900px !important; }
-        h2 { font-size: 2.5rem; color: var(--text-color); }
-        .spread { display: flex; gap: 2rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+        h2 { font-size: 2.5rem; color: var(--text-color); margin-bottom: 1rem; }
+        
+        .controls { margin-bottom: 3rem; display: flex; gap: 1rem; justify-content: center; align-items: center; }
+        select { padding: 0.8em 1.5em; border-radius: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-color); font-size: 1rem; cursor: pointer; outline: none; }
+        select option { background: #222; color: #fff; }
+
+        .spread { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; perspective: 1000px; }
         .card-container { display: flex; flex-direction: column; gap: 1rem; align-items: center; width: 200px; }
-        .slot { width: 150px; height: 230px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.1); border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 4rem; cursor: pointer; transition: all 0.6s ease; color: var(--text-color); }
-        .slot.flipped { background: var(--primary-color); color: #12121a; border: none; transform: rotateY(180deg); }
-        .label { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.1em; }
-        .card-name { font-weight: 800; font-size: 1.1rem; margin-top: 0.5rem; opacity: 0; transition: 0.5s; color: var(--text-color); }
-        .card-meaning { font-size: 0.85rem; color: var(--text-muted); opacity: 0; transition: 0.5s; }
-        .show { opacity: 1 !important; }
-        #instructions { margin-bottom: 2rem; color: var(--text-muted); }
+        
+        .slot { 
+          width: 180px; height: 300px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; 
+        }
+        .slot.flipped { transform: rotateY(180deg); }
+        
+        .card-face {
+          position: absolute; inset: 0; backface-visibility: hidden; border-radius: 1rem; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .card-back { 
+          background: linear-gradient(135deg, #2a2a3e, #1a1a2e); 
+          border: 2px solid rgba(255,255,255,0.1);
+          background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 10px);
+        }
+        .card-back::after { content: '🔮'; font-size: 3rem; opacity: 0.5; }
+        
+        .card-front { 
+          transform: rotateY(180deg); background: #000; overflow: hidden; 
+        }
+        .card-front img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .label { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+        .card-info { margin-top: 1rem; opacity: 0; transition: 0.5s; transform: translateY(10px); }
+        .card-info.show { opacity: 1; transform: translateY(0); }
+        .card-name { font-weight: 800; font-size: 1.1rem; color: var(--text-color); }
+        .card-meaning { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4; }
+        
+        #resetBtn { margin-top: 3rem; background: var(--primary-color); color: #12121a; border: none; padding: 1em 2em; border-radius: 1rem; font-weight: 700; cursor: pointer; display: none; }
+        #resetBtn:hover { transform: translateY(-2px); }
       </style>
-      <h2>Three-Card Spread</h2>
-      <p id="instructions">Reflect on your path. Reveal the Past, Present, and Future.</p>
+      
+      <h2>Tarot Reading</h2>
+      
+      <div class="controls">
+        <label for="concern">Focus on:</label>
+        <select id="concern">
+          <option value="general">General Guidance</option>
+          <option value="love">Love & Relationships</option>
+          <option value="career">Career & Work</option>
+        </select>
+      </div>
+
       <div class="spread">
         <div class="card-container">
-          <div class="label">Past</div>
-          <div class="slot" data-pos="0">🔮</div>
-          <div class="card-name"></div>
-          <div class="card-meaning"></div>
+          <div class="label">Past / Foundation</div>
+          <div class="slot" id="slot0">
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front"><img src="" alt=""></div>
+          </div>
+          <div class="card-info">
+            <div class="card-name"></div>
+            <div class="card-meaning"></div>
+          </div>
         </div>
+        
         <div class="card-container">
-          <div class="label">Present</div>
-          <div class="slot" data-pos="1">🔮</div>
-          <div class="card-name"></div>
-          <div class="card-meaning"></div>
+          <div class="label">Present / Challenge</div>
+          <div class="slot" id="slot1">
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front"><img src="" alt=""></div>
+          </div>
+          <div class="card-info">
+            <div class="card-name"></div>
+            <div class="card-meaning"></div>
+          </div>
         </div>
+        
         <div class="card-container">
-          <div class="label">Future</div>
-          <div class="slot" data-pos="2">🔮</div>
-          <div class="card-name"></div>
-          <div class="card-meaning"></div>
+          <div class="label">Future / Advice</div>
+          <div class="slot" id="slot2">
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front"><img src="" alt=""></div>
+          </div>
+          <div class="card-info">
+            <div class="card-name"></div>
+            <div class="card-meaning"></div>
+          </div>
         </div>
       </div>
-      <button id="resetBtn" style="margin-top: 3rem; background: transparent; color: var(--text-muted); border: 1px solid var(--surface-border); padding: 0.8em 1.5em; border-radius: 1rem; cursor: pointer; display: none;">New Reading</button>
+      
+      <button id="resetBtn">New Reading</button>
     `;
-    const slots = shadow.querySelectorAll('.slot');
-    const resetBtn = shadow.querySelector('#resetBtn');
-    let flippedCount = 0;
-    slots.forEach(slot => {
-      slot.addEventListener('click', () => {
-        if (slot.classList.contains('flipped')) return;
-        const card = cards[Math.floor(Math.random() * cards.length)];
-        slot.classList.add('flipped');
-        slot.textContent = card.img;
-        const container = slot.parentElement;
-        const nameEl = container.querySelector('.card-name');
-        const meaningEl = container.querySelector('.card-meaning');
-        nameEl.textContent = card.name;
-        meaningEl.textContent = card.meaning;
-        nameEl.classList.add('show');
-        meaningEl.classList.add('show');
-        flippedCount++;
-        if (flippedCount === 3) resetBtn.style.display = 'inline-block';
+
+    this.concernSelect = shadow.querySelector('#concern');
+    this.resetBtn = shadow.querySelector('#resetBtn');
+    this.slots = [shadow.querySelector('#slot0'), shadow.querySelector('#slot1'), shadow.querySelector('#slot2')];
+    this.flippedCount = 0;
+
+    this.slots.forEach(slot => {
+      slot.addEventListener('click', () => this.flipCard(slot));
+    });
+
+    this.resetBtn.addEventListener('click', () => {
+      this.flippedCount = 0;
+      this.resetBtn.style.display = 'none';
+      this.slots.forEach(slot => {
+        slot.classList.remove('flipped');
+        slot.parentElement.querySelector('.card-info').classList.remove('show');
       });
     });
-    resetBtn.addEventListener('click', () => { location.reload(); });
+  }
+
+  flipCard(slot) {
+    if (slot.classList.contains('flipped')) return;
+    
+    // Pick random card
+    const card = this.deck[Math.floor(Math.random() * this.deck.length)];
+    const concern = this.concernSelect.value;
+    const meaning = card.meanings[concern] || card.meanings.general;
+    
+    // Update DOM
+    const img = slot.querySelector('img');
+    img.src = card.img;
+    img.alt = card.name;
+    
+    const container = slot.parentElement;
+    const nameEl = container.querySelector('.card-name');
+    const meaningEl = container.querySelector('.card-meaning');
+    
+    nameEl.textContent = card.name;
+    meaningEl.textContent = meaning;
+    
+    slot.classList.add('flipped');
+    
+    setTimeout(() => {
+      container.querySelector('.card-info').classList.add('show');
+    }, 600);
+
+    this.flippedCount++;
+    if (this.flippedCount === 3) {
+      setTimeout(() => this.resetBtn.style.display = 'inline-block', 1000);
+    }
   }
 }
 customElements.define('tarot-reader', TarotReader);
