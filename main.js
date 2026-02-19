@@ -85,8 +85,10 @@ class DailyFortune extends HTMLElement {
         .form { display: grid; gap: 1.5rem; text-align: left; max-width: 400px; margin: 0 auto; }
         .field { display: flex; flex-direction: column; gap: 0.5rem; }
         label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-        input, select { padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-color); font-family: inherit; }
-        button { margin-top: 1rem; padding: 1.25rem; border-radius: 1rem; border: none; background: var(--primary-color); color: #12121a; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        input, select { padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-color); font-family: inherit; appearance: none; }
+        select option { background-color: #1a1a2e; color: #ffffff; }
+        [data-theme="light"] select option { background-color: #ffffff; color: #1e1e2e; }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); }
         button:hover { transform: translateY(-2px); filter: brightness(1.1); }
       </style>
       <h2>${t('card_fortune_title')}</h2>
