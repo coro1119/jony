@@ -14,19 +14,20 @@ A modern, framework-less web application that functions as a visually appealing 
 *   **Themes:** Support for both Dark and Light modes with persistent storage.
 
 ### Features
-*   **Web Components:** Reusable `<lotto-generator>` and `<contact-form>` components.
+*   **Web Components:** Reusable `<lotto-generator>`, `<contact-form>`, and `<disqus-comments>` components.
 *   **ES Modules:** Organized and maintainable JavaScript.
 *   **Lotto Number Generation:** Generates 6 unique random numbers.
 *   **Theme Switcher:** Toggle between light and dark themes.
 *   **Contact Form:** Integration with Formspree for handling messages.
+*   **Comments:** Integration with Disqus for user engagement.
 
 ## Current Plan
 
-**Request:** "formspree 제휴 받을수있는 간단한 폼 만들어줘. https://formspree.io/f/mpqjlvro" (Create a simple contact form with Formspree integration)
+**Request:** "discus 로 댓글기능 만들고 싶어." (I want to add comment functionality with Disqus)
 
 **Steps:**
 
-1.  **Update `main.js`:** Create the `ContactForm` web component with Formspree endpoint integration.
-2.  **Update `index.html`:** Add the `<contact-form>` component.
-3.  **Update `blueprint.md`:** Document the new contact form feature.
+1.  **Update `main.js`:** Create the `DisqusComments` web component with Disqus embed script.
+2.  **Update `index.html`:** Add the `<disqus-comments>` component.
+3.  **Update `blueprint.md`:** Document the new Disqus comments feature.
 4.  **Push to GitHub:** Commit and push the changes.

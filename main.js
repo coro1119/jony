@@ -211,3 +211,36 @@ class ContactForm extends HTMLElement {
 }
 
 customElements.define('contact-form', ContactForm);
+
+class DisqusComments extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = `
+      <style>
+        .disqus-container {
+          margin-top: 2rem;
+          padding: 2rem;
+          background: var(--surface-color);
+          border-radius: 1rem;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+      </style>
+      <div class="disqus-container">
+        <div id="disqus_thread"></div>
+        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      </div>
+    `;
+
+    if (!window.disqus_config) {
+        const script = document.createElement('script');
+        script.src = 'https://coro-1.disqus.com/embed.js';
+        script.setAttribute('data-timestamp', +new Date());
+        (document.head || document.body).appendChild(script);
+    } else if (typeof DISQUS !== 'undefined') {
+        DISQUS.reset({
+            reload: true
+        });
+    }
+  }
+}
+
+customElements.define('disqus-comments', DisqusComments);
