@@ -294,7 +294,7 @@ class ContactForm extends HTMLElement {
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
-    shadow.innerHTML = \`
+    shadow.innerHTML = `
       <style>
         :host { display: block; padding: 3rem; background: var(--surface-color); border-radius: 2rem; border: 1px solid var(--surface-border); }
         h2 { font-size: 2rem; margin: 0 0 1.5rem; letter-spacing: -0.04em; }
@@ -310,7 +310,7 @@ class ContactForm extends HTMLElement {
         <div class="field"><label>Message</label><textarea name="message" rows="4" required placeholder="What's on your mind?"></textarea></div>
         <button type="submit">Send</button>
       </form>
-    \`;
+    `;
   }
 }
 customElements.define('contact-form', ContactForm);
