@@ -1,23 +1,23 @@
 :root {
     --base-hue: 260;
-    --text-color: oklch(98% 0.01 var(--base-hue));
-    --text-muted: oklch(80% 0.02 var(--base-hue));
-    --surface-color: oklch(20% 0.04 var(--base-hue) / 70%);
-    --surface-border: oklch(100% 0 0 / 10%);
-    --primary-color: oklch(75% 0.18 var(--base-hue));
-    --bg-color: oklch(12% 0.03 var(--base-hue));
-    --accent-glow: oklch(75% 0.18 var(--base-hue) / 15%);
+    --text-color: #fcfcff;
+    --text-muted: #cbd5e1;
+    --surface-color: rgba(30, 30, 42, 0.7);
+    --surface-border: rgba(255, 255, 255, 0.1);
+    --primary-color: #a78bfa;
+    --bg-color: #12121a;
+    --accent-glow: rgba(167, 139, 250, 0.15);
     transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
 }
 
 [data-theme="light"] {
-    --text-color: oklch(20% 0.02 var(--base-hue));
-    --text-muted: oklch(45% 0.02 var(--base-hue));
-    --surface-color: oklch(100% 0 0 / 70%);
-    --surface-border: oklch(0% 0 0 / 8%);
-    --primary-color: oklch(60% 0.15 var(--base-hue));
-    --bg-color: oklch(97% 0.01 var(--base-hue));
-    --accent-glow: oklch(60% 0.15 var(--base-hue) / 10%);
+    --text-color: #1e1e2e;
+    --text-muted: #64748b;
+    --surface-color: rgba(255, 255, 255, 0.7);
+    --surface-border: rgba(0, 0, 0, 0.08);
+    --primary-color: #7c3aed;
+    --bg-color: #f8f8fb;
+    --accent-glow: rgba(124, 58, 237, 0.1);
 }
 
 body {
