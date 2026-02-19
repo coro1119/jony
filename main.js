@@ -72,18 +72,46 @@ class LottoGenerator extends HTMLElement {
             0 2px 5px -2px oklch(0 0 0 / 40%);
         }
 
+        .controls {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+        }
+
+        .secondary-button {
+          background: var(--surface-color);
+          color: var(--text-color);
+          border: 1px solid oklch(from var(--text-color) l c h / 10%);
+        }
+
       </style>
       <h1>Lotto Number Generator</h1>
       <div class="numbers">
         ${Array(6).fill('<div class="number">?</div>').join('')}
       </div>
-      <button>Generate Numbers</button>
+      <div class="controls">
+        <button id="generateBtn">Generate Numbers</button>
+        <button id="themeToggle" class="secondary-button">Toggle Theme</button>
+      </div>
     `;
 
-    this.button = shadow.querySelector('button');
+    this.button = shadow.querySelector('#generateBtn');
+    this.themeToggle = shadow.querySelector('#themeToggle');
     this.numberElements = shadow.querySelectorAll('.number');
 
     this.button.addEventListener('click', this.generateNumbers.bind(this));
+    this.themeToggle.addEventListener('click', this.toggleTheme.bind(this));
+
+    // Initialize theme from storage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+
+  toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
   }
 
   generateNumbers() {
