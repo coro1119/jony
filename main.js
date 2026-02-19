@@ -66,7 +66,7 @@ class LottoGenerator extends HTMLElement {
           border: none;
           border-radius: 1rem;
           background: var(--primary-color);
-          color: oklch(15% 0.05 var(--base-hue));
+          color: #12121a;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 0 10px 25px -5px oklch(from var(--primary-color) l c h / 40%);
@@ -149,6 +149,227 @@ class LottoGenerator extends HTMLElement {
 
 customElements.define('lotto-generator', LottoGenerator);
 
+class DailyFortune extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const fortunes = [
+      "Good things come to those who wait.",
+      "A golden opportunity will arise today.",
+      "Your creativity will lead to success.",
+      "A pleasant surprise is in store for you.",
+      "Focus on the present moment.",
+      "New beginnings are just around the corner.",
+      "Your kindness will be rewarded.",
+      "Trust your intuition."
+    ];
+
+    shadow.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          padding: 2.5rem;
+          background: var(--surface-color);
+          border-radius: 2rem;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--surface-border);
+          text-align: center;
+        }
+        h2 { font-size: 2rem; margin-top: 0; color: var(--text-color); letter-spacing: -0.04em; }
+        #fortuneText { 
+          font-size: 1.25rem; 
+          color: var(--text-muted); 
+          margin: 1.5rem 0;
+          min-height: 3rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        button {
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.75rem;
+          border: none;
+          background: var(--primary-color);
+          color: #12121a;
+          font-weight: bold;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+      </style>
+      <h2>Daily Fortune</h2>
+      <div id="fortuneText">Click to see your fortune...</div>
+      <button id="getFortune">Get Fortune</button>
+    `;
+
+    this.btn = shadow.querySelector('#getFortune');
+    this.text = shadow.querySelector('#fortuneText');
+
+    this.btn.addEventListener('click', () => {
+      const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+      this.text.textContent = fortune;
+      this.text.animate([
+        { opacity: 0, transform: 'translateY(10px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: 500, easing: 'ease-out' });
+    });
+  }
+}
+customElements.define('daily-fortune', DailyFortune);
+
+class FortuneCookie extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const fortunes = [
+      "Believe in yourself.",
+      "Adventure is out there.",
+      "Hard work pays off.",
+      "Be the change you wish to see.",
+      "Smile, it's free therapy.",
+      "Success is a journey, not a destination."
+    ];
+
+    shadow.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          padding: 2.5rem;
+          background: var(--surface-color);
+          border-radius: 2rem;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--surface-border);
+          text-align: center;
+        }
+        .cookie-container {
+          position: relative;
+          height: 150px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cookie {
+          font-size: 80px;
+          transition: transform 0.5s ease;
+        }
+        .cookie.cracked { transform: scale(1.2) rotate(15deg); filter: grayscale(1); opacity: 0.5; }
+        #fortune {
+          margin-top: 1rem;
+          font-weight: 600;
+          color: var(--primary-color);
+          font-style: italic;
+          opacity: 0;
+        }
+        .show { opacity: 1 !important; animation: slideIn 0.5s forwards; }
+        @keyframes slideIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      </style>
+      <h2>Fortune Cookie</h2>
+      <div class="cookie-container">
+        <div class="cookie">🥠</div>
+      </div>
+      <div id="fortune"></div>
+    `;
+
+    const cookie = shadow.querySelector('.cookie');
+    const text = shadow.querySelector('#fortune');
+
+    cookie.addEventListener('click', () => {
+      if (cookie.classList.contains('cracked')) return;
+      cookie.classList.add('cracked');
+      text.textContent = fortunes[Math.floor(Math.random() * fortunes.length)];
+      text.classList.add('show');
+    });
+  }
+}
+customElements.define('fortune-cookie', FortuneCookie);
+
+class TarotReader extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const cards = [
+      { name: "The Fool", meaning: "New beginnings, optimism, trust in life." },
+      { name: "The Magician", meaning: "Action, power, manifestation." },
+      { name: "The High Priestess", meaning: "Intuition, sacred knowledge, subconscious mind." },
+      { name: "The Empress", meaning: "Femininity, beauty, nature, nurturing." },
+      { name: "The Emperor", meaning: "Authority, establishment, structure." },
+      { name: "The Hierophant", meaning: "Spiritual wisdom, religious beliefs, conformity." },
+      { name: "The Lovers", meaning: "Love, harmony, relationships." }
+    ];
+
+    shadow.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          padding: 2.5rem;
+          background: var(--surface-color);
+          border-radius: 2rem;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--surface-border);
+          text-align: center;
+        }
+        .card-slot {
+          width: 120px;
+          height: 180px;
+          border: 2px dashed var(--surface-border);
+          border-radius: 1rem;
+          margin: 1.5rem auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 3rem;
+          transition: all 0.5s ease;
+          background: rgba(255,255,255,0.05);
+        }
+        .card-slot.flipped {
+          background: var(--primary-color);
+          color: #12121a;
+          border: none;
+          transform: rotateY(180deg);
+        }
+        #cardInfo { margin-top: 1rem; }
+        #cardName { font-weight: 800; font-size: 1.25rem; }
+        #cardMeaning { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; }
+      </style>
+      <h2>Tarot Reading</h2>
+      <div class="card-slot">🃏</div>
+      <div id="cardInfo">
+        <div id="cardName">Pick a card</div>
+        <div id="cardMeaning">Focus on your question and click the card.</div>
+      </div>
+      <button id="resetBtn" style="margin-top: 1rem; display:none;">Reset</button>
+    `;
+
+    const slot = shadow.querySelector('.card-slot');
+    const name = shadow.querySelector('#cardName');
+    const meaning = shadow.querySelector('#cardMeaning');
+    const reset = shadow.querySelector('#resetBtn');
+
+    slot.addEventListener('click', () => {
+      if (slot.classList.contains('flipped')) return;
+      const card = cards[Math.floor(Math.random() * cards.length)];
+      slot.classList.add('flipped');
+      slot.textContent = "✨";
+      name.textContent = card.name;
+      meaning.textContent = card.meaning;
+      reset.style.display = "inline-block";
+    });
+
+    reset.addEventListener('click', () => {
+      slot.classList.remove('flipped');
+      slot.textContent = "🃏";
+      name.textContent = "Pick a card";
+      meaning.textContent = "Focus on your question and click the card.";
+      reset.style.display = "none";
+    });
+  }
+}
+customElements.define('tarot-reader', TarotReader);
+
 class ContactForm extends HTMLElement {
   constructor() {
     super();
@@ -193,8 +414,8 @@ class ContactForm extends HTMLElement {
         input, textarea {
           padding: 1rem;
           border-radius: 1rem;
-          border: 1px solid oklch(from var(--text-color) l c h / 10%);
-          background: oklch(from var(--text-color) l c h / 3%);
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.03);
           color: var(--text-color);
           font-family: inherit;
           font-size: 1rem;
@@ -203,8 +424,8 @@ class ContactForm extends HTMLElement {
         input:focus, textarea:focus {
           outline: none;
           border-color: var(--primary-color);
-          background: oklch(from var(--text-color) l c h / 5%);
-          box-shadow: 0 0 0 4px oklch(from var(--primary-color) l c h / 10%);
+          background: rgba(255,255,255,0.05);
+          box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
         }
         button {
           margin-top: 0.5rem;
@@ -212,17 +433,17 @@ class ContactForm extends HTMLElement {
           border-radius: 1rem;
           border: none;
           background: var(--primary-color);
-          color: oklch(15% 0.05 var(--base-hue));
+          color: #12121a;
           font-weight: 700;
           font-size: 1.1rem;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 10px 20px -5px oklch(from var(--primary-color) l c h / 30%);
+          box-shadow: 0 10px 20px -5px rgba(167, 139, 250, 0.3);
         }
         button:hover {
           transform: translateY(-2px);
           filter: brightness(1.1);
-          box-shadow: 0 15px 30px -5px oklch(from var(--primary-color) l c h / 40%);
+          box-shadow: 0 15px 30px -5px rgba(167, 139, 250, 0.4);
         }
       </style>
       <h2>Get in touch</h2>
